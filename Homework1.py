@@ -3,37 +3,65 @@ import functools
 import tracemalloc
 
 
-def to_cache(limit_cache=5,cache = []):
-    def inner(f):
+def cache(limit=4):
+    def internal(f):
         @functools.wraps(f)
-        def deco(*args,**kwargs):
-                for_check = []
-                if len(cache)<limit_cache:
-                    cache.append(f(*args,**kwargs))
-                    cache.sort() 
+        def deco(*args, **kwargs):
+            result = f(*args,**kwargs)
+            
+            if sum(cache.values()) < limit:
+                if args not in cache.keys():
+                    cache[args] = 1
                 else:
-                    for_check = [cache.count(i) for i in cache]
-                    cache.pop(for_check.index(min(for_check)))
-                    cache.sort() 
-                    cache.append(f(*args,**kwargs))
-                return cache                
+                    cache[args] += 1
+            else:
+                for i in cache.keys():
+                    if cache.get(i) == min(i for i in cache.values()):
+                        delete = i                        
+                cache.pop(delete)
+                if args not in cache.keys():
+                    cache[args] = 1
+                else:
+                    cache[args] += 1
+            cache_copy =cache.copy()
+            sorted_cache = dict()
+            count =0
+            while len(cache_copy)!=0:
+                count+=1
+                for i in cache_copy:
+                    if cache_copy[i] == min(cache_copy.values()):
+                        sorted_cache[i] = (cache_copy.get(i) * (str(result)+' ')),cache_copy.get(i)
+                        delete = i
+                cache_copy.pop(delete)
+            print(sorted_cache)
+            return result
+        cache = dict()
         return deco
-    return inner    
+    return internal    
 
-def memory_used():
-    def inner(f):
-        def deco(*args,**kwargs):
-            tracemalloc.start()
-            f(*args,**kwargs)
-            res = tracemalloc.get_traced_memory()
-            tracemalloc.stop 
-            return 'current size: '+str(round(res[0] * (9.537*(10**-7)),2))+' megabytes'+'\n'+'peak size: ' + str(round(res[1] * (9.537*(10**-7)),2)) + ' megabytes'
-        return deco
-    return inner
+def memory_used(f):
+    @functools.wraps(f)
+    def deco(*args,**kwargs):
+        tracemalloc.start()
+        result  = f(*args,**kwargs)
+        res = tracemalloc.get_traced_memory()
+        tracemalloc.stop 
+        print(result,': middle size: '+str(round(res[0]/1048576,2))+' MB, '+'max size: ' + str(round(res[1] /1048576,2)) + ' MB') 
+        return result
+    return deco
+   
 
-@memory_used()
-@to_cache(limit_cache=4)
+@memory_used
+@cache(limit=5)
 def fetch_url(url, first_n=10):
     """Fetch a given url"""
     res = requests.get(url)
     return res.content[:first_n] if first_n else res.content
+
+
+fetch_url('http://ithillel.ua')
+fetch_url('http://ithillel.ua')
+fetch_url('http://youtube.com')
+fetch_url('http://google.com')
+fetch_url('http://youtube.com')
+fetch_url('http://ithillel.ua')

@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return  "<p>Hello World!!!/p>"
+    return  "<p>Hello World!!!<p>"
 
 
 @app.route("/hello")
@@ -18,14 +18,18 @@ def hello_anton():
 @app.route("/password")
 def genetare_password():
     len_password = random.randint(10, 20)
-    password = ''
-    while len(password) <= len_password:
+    password_lst = []
+    result = ''
+    while len(password_lst) <= len_password:
         for_mess = random.randint(0, 11)
         if for_mess < 6:
-            password += chr(random.randint(32, 126))
+            password_lst.append(chr(random.randint(32, 126)))
         else:
-            password += str(random.randint(0, 9))
-    return 'Password: '+password
+            password_lst.append(str(random.randint(0, 9)))
+    random.shuffle(password_lst)
+    for i in password_lst:
+        result += i
+    return result
 
 @app.route("/avarage")
 def calculate_average():
@@ -35,9 +39,7 @@ def calculate_average():
         height = []
         weight = []
         for raw in reader:
-            if count == 0:
-                pass
-            else:
+            if count != 0:
                 height.append(float(raw[1]))
                 weight.append(float(raw[2]))
             count += 1

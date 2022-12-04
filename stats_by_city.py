@@ -26,10 +26,10 @@ def hello():
 def stats(genre):
     if genre == None:
         return 'Should have: genre'
-    query = 'SELECT BillingCountry,genre,max(CNT) FROM'
-    query+=' (SELECT BillingCountry,genres.Name as genre,count(genres.Name) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
+    query = 'SELECT BillingCity,genre,max(CNT) FROM'
+    query+=' (SELECT BillingCity,genres.Name as genre,count(genres.Name) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
     query+=' JOIN genres On tracks.GenreId=genres.GenreId'
-    query+=' JOIN invoices On invoices.InvoiceId=invoice_items.InvoiceId WHERE genre ="'+genre+ '" GROUP By BillingCountry)'
+    query+=' JOIN invoices On invoices.InvoiceId=invoice_items.InvoiceId WHERE genre ="'+genre+ '" GROUP By BillingCity)'
     records = execute_query(query)
     records = format_records_lst(records)
     if 'None' in records:

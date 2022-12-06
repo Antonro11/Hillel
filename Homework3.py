@@ -34,12 +34,7 @@ def generate_students(count):
         writer = csv.writer(file)
         for row in students_lst:
             writer.writerow(row)
-    with open('students.csv', 'r') as file:
-        result_str = ''
-        for i in file.readlines():
-            result_str += i + '</br>'
-        return result_str
-
+    return students_lst
 
 
 @app.route("/bitcoin")
@@ -60,20 +55,16 @@ def get_bitcoin_value(currency,count):
     resource_url = 'https://test.bitpay.com/currencies'
     headers = {'X-Accept-Version': '2.0.0', 'Content-type': 'application/json'}
     response_symbol = requests.get(url=resource_url, headers=headers).content
-    response_currencies = response_symbol.decode(json.detect_encoding(response_symbol))
-    currency_info = json.loads(response_currencies)
-    for dict_info in currency_info.values():
-        for key in dict_info:
-            if key['code'] == currency:
-                symbol = key['symbol']
+    response_symbol = json.loads(response_symbol)
+    for info in response_symbol['data']:
+        if info['code'] == currency:
+            symbol = info['symbol']
     resource_url_rates = 'https://bitpay.com/rates/BTC/' + str(currency)
     headers = {'X-Accept-Version': '2.0.0', 'Content-type': 'application/json'}
     response_rates = requests.get(url=resource_url_rates, headers=headers).content
     response_rates = json.loads(response_rates)
 
     return str(round(count * (response_rates['data']['rate']), 2)) + symbol + ' = ' + str(count) + 'Bitcoin'
-
-
 
 
 app.run(port=5001,debug=True)

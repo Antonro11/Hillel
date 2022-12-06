@@ -13,14 +13,9 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello World!!!<p>"
+    return "<p>Hello World!<p>"
 
-
-@app.route("/hello")
-def hello_anton():
-    return "<p>Hello Anton<p>"
-
-@app.route("/range")
+@app.route("/students")
 @use_kwargs(
     {
     "count":fields.Int(
@@ -32,27 +27,27 @@ def hello_anton():
 )
 def generate_students(count):
     faker = Faker()
+    students_lst = [('first_name','last_name','email','password','birthday')]
+    for i in range(count):
+        students_lst.append((faker.first_name(),faker.last_name(),faker.email(),faker.password(),faker.date_of_birth()))
     with open('students.csv', 'w') as file:
         writer = csv.writer(file)
-        writer.writerow(('first_name','last_name','email','password','birthday'))
-    for i in range(count):
-        with open('students.csv', 'a') as file:
-            writer = csv.writer(file)
-            writer.writerow((faker.first_name(),faker.last_name(),faker.email(),faker.password(),faker.date_of_birth()))
-
+        for row in students_lst:
+            writer.writerow(row)
     with open('students.csv', 'r') as file:
-        a = ''
+        result_str = ''
         for i in file.readlines():
-            a+=i
-            a+= '</br>'
-        return a
+            result_str += i + '</br>'
+        return result_str
+
 
 
 @app.route("/bitcoin")
 @use_kwargs(
     {
     "currency": fields.Str(
-        missing='USD'
+        missing='USD',
+        validate=validate.Regexp('[A-Z]')
         ),
     "count":fields.Int(
         missing=1,
@@ -65,18 +60,19 @@ def get_bitcoin_value(currency,count):
     resource_url = 'https://test.bitpay.com/currencies'
     headers = {'X-Accept-Version': '2.0.0', 'Content-type': 'application/json'}
     response_symbol = requests.get(url=resource_url, headers=headers).content
-    a = response_symbol.decode(json.detect_encoding(response_symbol))
-    data_symbol = json.loads(a)
-    for i in data_symbol.values():
-        for y in i:
-            if y['code'] == currency.upper():
-                symbol = y['symbol']
-    repsonse = requests.get('https://bitpay.com/api/rates')
-    data = repsonse.json()
-    for i in data:
-        if currency.upper() in i.values():
-            return str(i['rate']*count) + str(symbol) + ' = '+str(count) +'bitcoin'
-    return 'Wrong format'
+    response_currencies = response_symbol.decode(json.detect_encoding(response_symbol))
+    currency_info = json.loads(response_currencies)
+    for dict_info in currency_info.values():
+        for key in dict_info:
+            if key['code'] == currency:
+                symbol = key['symbol']
+    resource_url_rates = 'https://bitpay.com/rates/BTC/' + str(currency)
+    headers = {'X-Accept-Version': '2.0.0', 'Content-type': 'application/json'}
+    response_rates = requests.get(url=resource_url_rates, headers=headers).content
+    response_rates = json.loads(response_rates)
+
+    return str(round(count * (response_rates['data']['rate']), 2)) + symbol + ' = ' + str(count) + 'Bitcoin'
+
 
 
 

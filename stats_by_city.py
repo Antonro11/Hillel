@@ -17,24 +17,26 @@ def hello():
 @use_kwargs(
     {
     "genre":fields.Str(
-        missing=None,
+        required=True,
         validate=[validate.Length(min=1,max=30)]
         )
     },
     location='query'
 )
 def stats(genre):
-    if genre == None:
-        return 'Should have: genre'
-    query = 'SELECT BillingCity,genre,max(CNT) FROM'
-    query+=' (SELECT BillingCity,genres.Name as genre,count(genres.Name) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
-    query+=' JOIN genres On tracks.GenreId=genres.GenreId'
-    query+=' JOIN invoices On invoices.InvoiceId=invoice_items.InvoiceId WHERE genre ="'+genre+ '" GROUP By BillingCity)'
+    query = 'SELECT * FROM'
+    query+=' (SELECT BillingCity,genres.Name,count(BillingCity) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
+    query+=' JOIN invoices on invoice_items.InvoiceId = invoices.InvoiceId'
+    query+=' JOIN genres on tracks.GenreId = genres.GenreId'
+    query+=' WHERE genres.Name="'+genre+'" GROUP By BillingCity ORDER BY CNT DESC)'
+    query += ' WHERE CNT = (SELECT MAX(CNT) FROM (SELECT BillingCity,genres.Name,count(BillingCity) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
+    query += ' JOIN invoices on invoice_items.InvoiceId = invoices.InvoiceId'
+    query += ' JOIN genres on tracks.GenreId = genres.GenreId '
+    query += ' WHERE genres.Name="'+genre+'" GROUP By BillingCity ORDER BY CNT DESC))'
     records = execute_query(query)
-    records = format_records_lst(records)
-    if 'None' in records:
-        return 'Not Found'
-    return records
+    if len(records) == 0:
+        return 'Genre Not Found'
+    return format_records_lst(records)
 
 
 

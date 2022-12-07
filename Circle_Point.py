@@ -8,3 +8,13 @@ class Circle:
             return True
         else:
             return False
+
+class Point:        
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
+        
+
+circle = Circle(2,2,4)
+point = Point(2,3)
+print(circle.contains(point.x,point.y))

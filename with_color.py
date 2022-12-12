@@ -6,9 +6,11 @@ class Colored:
         self.color = color
         self.colors = {'red':Fore.RED,'green':Fore.GREEN,'blue':Fore.BLUE,
         'yellow':Fore.YELLOW,'cyan':Fore.CYAN}
+        
     def __enter__(self):
         if self.color in self.colors:
             print(self.colors[self.color])
+            
     def __exit__(self,type,value,traceback):
         print(Fore.RESET)
         

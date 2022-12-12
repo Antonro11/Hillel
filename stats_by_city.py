@@ -24,20 +24,18 @@ def hello():
     location='query'
 )
 def stats(genre):
-    query = 'SELECT * FROM'
-    query+=' (SELECT BillingCity,genres.Name,count(BillingCity) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
-    query+=' JOIN invoices on invoice_items.InvoiceId = invoices.InvoiceId'
-    query+=' JOIN genres on tracks.GenreId = genres.GenreId'
-    query+=' WHERE genres.Name="'+genre+'" GROUP By BillingCity ORDER BY CNT DESC)'
-    query += ' WHERE CNT = (SELECT MAX(CNT) FROM (SELECT BillingCity,genres.Name,count(BillingCity) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId'
-    query += ' JOIN invoices on invoice_items.InvoiceId = invoices.InvoiceId'
-    query += ' JOIN genres on tracks.GenreId = genres.GenreId '
-    query += ' WHERE genres.Name="'+genre+'" GROUP By BillingCity ORDER BY CNT DESC))'
+    query = """WITH BASE AS
+    (SELECT BillingCity,genres.Name,count(BillingCity) as CNT FROM tracks JOIN invoice_items on tracks.TrackId=invoice_items.TrackId
+    JOIN invoices on invoice_items.InvoiceId = invoices.InvoiceId
+    JOIN genres on tracks.GenreId = genres.GenreId 
+    WHERE genres.Name='"""+genre+"""' GROUP By BillingCity)
+    SELECT * FROM BASE
+    WHERE CNT = (SELECT MAX(CNT) FROM BASE)"""
+
     records = execute_query(query)
     if len(records) == 0:
         return 'Genre Not Found'
     return format_records_lst(records)
-
 
 
 

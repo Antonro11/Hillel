@@ -4,10 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 faker = "*"
-ipython = "*"
-colorama = "*"
+
+
 
 [dev-packages]
 

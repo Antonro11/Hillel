@@ -1,51 +1,61 @@
 """
 Dependency inversion
 
+We have class Persons with some info about person and we have class Sort_student_or_teacher, wich can get
+every collection and sort it by teachers or students, and it not depends on our upper class. If we don't get data
+wich relates to students or teachers, we get massage, no sudents or teachers there.
+
 """
 
-class Info:
-    def __init__(self):
-            self.lst_groups = ['A','B','C','D']
-            self.lst_subjects = ['mathematic','culture','chemistry','geography']
 
-class Teacher(Info):
+
+class Persons:
     def __init__(self):
-        super().__init__()
-        self.teachers = list()
+        self.persons = []
     
-    def add_teachers(self,name,name_subject):
-        if name_subject in self.lst_subjects:
-            self.teachers.append([name_subject+':',name])
-        else:
-            print('Subject name is not found')
-
-class Students(Info):
-    def __init__(self):
-        super().__init__()
-        self.students = list()
+    def add_person(self,*args):
+        self.persons.append(args)
     
-    def add_students(self,name,name_group,mark):
-        if name_group in self.lst_groups:
-            self.students.append(['Group '+name_group+':',name+',','average mark:',mark])
-        else:
-            print('Group is not found')
+    def get_persons(self):
+        return self.persons
 
-class Result(Students,Teacher):
+
+class Sort_student_or_teacher:
     def __init__(self):
-        super().__init__()
+        self.groups = ['A','B','C','D']
+        self.subjects = ['mathematic','culture','chemistry']
+        self.students= []
+        self.teachers = []
+        
 
-    def print_result(self):
-        return self.teachers,self.students
+    def sort_by_persons(self,args):
+        for i in args:
+            for y in self.groups:
+                if y in i:
+                   self.students.append(i)
+        for i in args:
+            for y in self.subjects:
+                if y in i:
+                   self.teachers.append(i)
 
-"""
-Our parent class Info is not depend on our lower classes, but they are depends from it directly
+    def show_students(self):
+        if len(self.students) == 0:
+            return 'No students in list'
+        return self.students
+    
+    def show_teachers(self):
+        if len(self.teachers) == 0:
+            return 'No teachers in list'
+        return self.teachers
 
-"""
+    
+a = Persons()
+b = Sort_student_or_teacher()
+a.add_person('Anton','B','20.04.1997')
+a.add_person('Vasya','chemistry','12,10,1991')
+b.sort_by_persons(a.get_persons())
+print(b.show_students())
+print(b.show_teachers())
 
-a = Result()
-a.add_students('Vasya','B',65)
-a.add_students('Petya','D',82)
-a.add_teachers('Vadim','culture')
-a.add_teachers('SVetlana','mathematic')
-print(a.print_result())
-
+                   
+                    

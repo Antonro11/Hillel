@@ -1,41 +1,42 @@
 """
 Interface separeted
 
-We created class Group and Teachers, and we can calculate average or maximumm value of marks or salaries.
-So to create separate class for this calculation is better than put it in every class.
+We could make one class Group wich could make sorting our group dictionary by keys, or values.
+But in this case we will need to write this functions again if we will need to use it on another dictionaryies.
+It not goes to ISP.
+So we separate this tho classes. 
+
 
 """
 
 
-
-class Group_info:
+class Group:
     def __init__(self):
-        self.group = {
-            'Anton':88,
-            'Sergiy':75,
-            'Masha':95
-        }
+        pass
 
-class Teachers_info:
+    def show_group(self):
+        return {'Anton':85,'Zhenya':56,'Katya':97}
+
+class SortDictValues:
     def __init__(self):
-        self.teachers ={
-            'Anatoliy':1700,
-            'Vitaliy':1800,
-            'Pavel':2100
-            }
+        pass
+    
+    def sort_dict(self,dict):
+        sorted_dict = {key: value for key,value in sorted(dict.items(),key = lambda value:value[1])}
+        return sorted_dict
 
-class Avarege_max:
-    def avarage(values):
-        return str(round(sum(values)/len(values),2))
-    def maximumm(values):
-        return max(values)
+class SortDictKeys:
+    def __init__(self):
+        pass
+    
+    def sort_dict(self,dict):
+        sorted_dict = {key: value for key,value in sorted(dict.items())}
+        return sorted_dict
 
 
-a = Group_info()
-b = Teachers_info()
 
-c = Avarege_max
 
-print(c.avarage(a.group.values()))
-print(c.maximumm(b.teachers.values()))
+a = Group()
+b = SortDictValues()
+print(b.sort_dict(a.show_group()))
 
